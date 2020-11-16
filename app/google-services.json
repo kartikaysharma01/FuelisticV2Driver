@@ -1,0 +1,122 @@
+{
+  "project_info": {
+    "project_number": "941061680822",
+    "firebase_url": "https://fuelisticv2.firebaseio.com",
+    "project_id": "fuelisticv2",
+    "storage_bucket": "fuelisticv2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:941061680822:android:24ce005056ae5cbcfd8017",
+        "android_client_info": {
+          "package_name": "com.example.fuelisticv2client"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "941061680822-cpnsdk027fi6stdnhtdqh9g8fhpikdrj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fuelisticv2client",
+            "certificate_hash": "3551fd7ecd5e98335e5c67821d59b12ed6d41828"
+          }
+        },
+        {
+          "client_id": "941061680822-e4e63rpdg2k6qssbakhkf15fn69mog67.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOZ6kIcTjcuyGVCVnqcpYzUeDhO818AOA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "941061680822-e4e63rpdg2k6qssbakhkf15fn69mog67.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:941061680822:android:73796caef659a718fd8017",
+        "android_client_info": {
+          "package_name": "com.example.fuelisticv2driver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "941061680822-iu6r00o0mtq1v1gp26mll71fhfpo71f3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fuelisticv2driver",
+            "certificate_hash": "3551fd7ecd5e98335e5c67821d59b12ed6d41828"
+          }
+        },
+        {
+          "client_id": "941061680822-e4e63rpdg2k6qssbakhkf15fn69mog67.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOZ6kIcTjcuyGVCVnqcpYzUeDhO818AOA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "941061680822-e4e63rpdg2k6qssbakhkf15fn69mog67.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:941061680822:android:34449210200df99bfd8017",
+        "android_client_info": {
+          "package_name": "com.example.fuelisticv2seller"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "941061680822-tt8sqqqk0ft7e0iurgie856rpnf3nuhc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fuelisticv2seller",
+            "certificate_hash": "3551fd7ecd5e98335e5c67821d59b12ed6d41828"
+          }
+        },
+        {
+          "client_id": "941061680822-e4e63rpdg2k6qssbakhkf15fn69mog67.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOZ6kIcTjcuyGVCVnqcpYzUeDhO818AOA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "941061680822-e4e63rpdg2k6qssbakhkf15fn69mog67.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

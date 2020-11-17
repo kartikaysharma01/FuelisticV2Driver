@@ -1,16 +1,19 @@
 package com.example.fuelisticv2driver;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -45,6 +48,8 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.SquareCap;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -64,6 +69,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.paperdb.Paper;
 import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -84,11 +90,11 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
 
     // Animation
     private Handler handler;
-    private int index, next,  time;
+    private int index, next, time;
     private LatLng start, end;
     private float v;
     private double lat, lng;
-    private Polyline blackPolyline,greyPolyline;
+    private Polyline blackPolyline, greyPolyline;
     private PolylineOptions polylineOptions, blackPolylineOptions;
     private List<LatLng> polylineList;
     private IGoogleAPI iGoogleAPI;
@@ -112,7 +118,16 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
     MaterialButton btn_call;
     @BindView(R.id.btn_done)
     MaterialButton btn_done;
+    private Polyline redPolyline;
 
+    @OnClick(R.id.btn_start_trip)
+    void onStartTripClicked(){
+        String data = Paper.book().read(Common.SHIPPING_ORDER_DATA);
+//        Paper.book().write(Common.TRIP_START, data);
+//        btn_start_trip.setEnabled(false);
+
+        drawRoutes(data);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,7 +140,6 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
         buildLocationRequest();
         buildLocationCallback();
 
-        setShippingOrder();
 
         Dexter.withActivity(this)
                 .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -139,8 +153,8 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
                                 .findFragmentById(R.id.map);
                         mapFragment.getMapAsync(ShippingActivity.this::onMapReady);
 
-                        fusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(ShippingActivity.this);
-                        fusedLocationProviderClient.requestLocationUpdates( locationRequest, locationCallback, Looper.myLooper());
+                        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(ShippingActivity.this);
+                        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
 
                     }
 
@@ -162,34 +176,109 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
         Paper.init(this);
         String data = Paper.book().read(Common.SHIPPING_ORDER_DATA);
 
-        if(!TextUtils.isEmpty(data))
-        {
-                shippingOrderModel = new Gson()
-                        .fromJson(data, new TypeToken<ShippingOrderModel>(){}.getType());
+        if (!TextUtils.isEmpty(data)) {
+            drawRoutes(data);
+            shippingOrderModel = new Gson()
+                    .fromJson(data, new TypeToken<ShippingOrderModel>() {
+                    }.getType());
 
-                if(shippingOrderModel != null)
-                {
-                    Common.setSpanStringColor("Username: ", shippingOrderModel.getOrderModel().getUserName()
-                    , txt_user_name, Color.parseColor("#333639"));
+            if (shippingOrderModel != null) {
+                Common.setSpanStringColor("Username: ", shippingOrderModel.getOrderModel().getUserName()
+                        , txt_user_name, Color.parseColor("#333639"));
 
-                    Common.setSpanString("Delivery Date: ", shippingOrderModel.getOrderModel().getDeliveryDate()
-                            , txt_delivery_date );
+                Common.setSpanString("Delivery Date: ", shippingOrderModel.getOrderModel().getDeliveryDate()
+                        , txt_delivery_date);
 
-                    Common.setSpanStringColor("No. : ", shippingOrderModel.getOrderModel().getKey()
-                            , txt_order_number, Color.parseColor("#673ab7"));
-                    Common.setSpanStringColor("Address: ", shippingOrderModel.getOrderModel().getShippingAddress()
-                            , txt_address, Color.parseColor("#795548"));
+                Common.setSpanStringColor("No. : ", shippingOrderModel.getOrderModel().getKey()
+                        , txt_order_number, Color.parseColor("#673ab7"));
+                Common.setSpanStringColor("Address: ", shippingOrderModel.getOrderModel().getShippingAddress()
+                        , txt_address, Color.parseColor("#795548"));
 
 
-                }
-                else {
-                    Toast.makeText(this, "Shipping order is null!", Toast.LENGTH_SHORT).show();
-                }
+            } else {
+                Toast.makeText(this, "Shipping order is null!", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
+    @SuppressLint("MissingPermission")
+    private void drawRoutes(String data) {
+        ShippingOrderModel shippingOrderModel = new Gson()
+                .fromJson(data, new TypeToken<ShippingOrderModel>() {
+                }.getType());
+
+        //Add box
+        mMap.addMarker(new MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.box))
+                .title(shippingOrderModel.getOrderModel().getUserName())
+                .snippet(shippingOrderModel.getOrderModel().getShippingAddress())
+                .position(new LatLng(shippingOrderModel.getOrderModel().getLat(), shippingOrderModel.getOrderModel().getLng())));
+
+
+
+        fusedLocationProviderClient.getLastLocation()
+                .addOnFailureListener(e -> Toast.makeText(ShippingActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show())
+                .addOnSuccessListener(location -> {
+                    String to = new StringBuilder()
+                            .append(shippingOrderModel.getOrderModel().getLat())
+                            .append(",")
+                            .append(shippingOrderModel.getOrderModel().getLng())
+                            .toString();
+
+                    String from = new StringBuilder()
+                            .append(location.getLatitude())
+                            .append(",")
+                            .append(location.getLongitude())
+                            .toString();
+
+
+                    compositeDisposable.add(iGoogleAPI.getDirections("driving"
+                            , "less_driving",
+                            from, to, getString(R.string.google_maps_key))
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(s -> {
+
+                                try {
+                                    //Parse json
+                                    JSONObject jsonObject = new JSONObject(s);
+                                    JSONArray jsonArray = jsonObject.getJSONArray("routes");
+                                    for (int i = 0; i < jsonArray.length(); i++) {
+                                        JSONObject route = jsonArray.getJSONObject(i);
+                                        JSONObject poly = route.getJSONObject("overview_polyline");
+                                        String polyLine = poly.getString("points");
+                                        polylineList = Common.decodePoly(polyLine);
+
+                                    }
+
+                                    polylineOptions = new PolylineOptions();
+                                    polylineOptions.color(Color.RED);
+                                    polylineOptions.width(12);
+                                    polylineOptions.startCap(new SquareCap());
+                                    polylineOptions.jointType(JointType.ROUND);
+                                    polylineOptions.addAll(polylineList);
+                                    redPolyline = mMap.addPolyline(polylineOptions);
+                                } catch (Exception e) {
+                                    Toast.makeText(this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+
+                            }, throwable -> Toast.makeText(ShippingActivity.this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show()));
+
+                    String uri = "http://maps.google.com/maps?saddr=" + location.getLatitude() + "," + location.getLongitude() +
+                            "&daddr=" + shippingOrderModel.getOrderModel().getLat() + "," + shippingOrderModel.getOrderModel().getLng();
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                    startActivity(intent);
+
+
+                });
+
+
+
+
+    }
+
     private void buildLocationCallback() {
-        locationCallback = new LocationCallback(){
+        locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
@@ -197,13 +286,13 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
                 LatLng locationDriver = new LatLng(locationResult.getLastLocation().getLatitude(),
                         locationResult.getLastLocation().getLongitude());
 
-                if(driverMarker == null){
+                if (driverMarker == null) {
                     // Inflate drawable
-                    int height , width;
+                    int height, width;
                     height = width = 80;
                     BitmapDrawable bitmapDrawable = (BitmapDrawable) ContextCompat
                             .getDrawable(ShippingActivity.this, R.drawable.driver);
-                    Bitmap resized = Bitmap.createScaledBitmap(bitmapDrawable.getBitmap(), width,height,false);
+                    Bitmap resized = Bitmap.createScaledBitmap(bitmapDrawable.getBitmap(), width, height, false);
 
                     driverMarker = mMap.addMarker(new MarkerOptions()
                             .icon(BitmapDescriptorFactory.fromBitmap(resized))
@@ -214,13 +303,12 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
 
                 }
 
-                if(isInit && prevLocation != null)
-                {
-                   String from = new StringBuilder()
-                           .append(prevLocation.getLatitude())
-                           .append(",")
-                           .append(prevLocation.getLongitude())
-                           .toString();
+                if (isInit && prevLocation != null) {
+                    String from = new StringBuilder()
+                            .append(prevLocation.getLatitude())
+                            .append(",")
+                            .append(prevLocation.getLongitude())
+                            .toString();
 
                     String to = new StringBuilder()
                             .append(locationDriver.latitude)
@@ -236,7 +324,7 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
 
                 }
 
-                if(!isInit){
+                if (!isInit) {
                     isInit = true;
                     prevLocation = locationResult.getLastLocation();
                 }
@@ -250,105 +338,102 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
         // Request directions API to get data
         compositeDisposable.add(iGoogleAPI.getDirections("driving", "less_driving",
                 from, to, getString(R.string.google_maps_key))
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(returnResult  -> {
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(returnResult -> {
 
-            try{
-                //Parse json
-                JSONObject jsonObject = new JSONObject(returnResult);
-                JSONArray jsonArray = jsonObject.getJSONArray("routes");
-                for(int i=0; i<jsonArray.length(); i++)
-                {
-                    JSONObject route = jsonArray.getJSONObject(i);
-                    JSONObject poly = route.getJSONObject("overview_polyline");
-                    String polyLine = poly.getString("points");
-                    polylineList = Common.decodePoly(polyLine);
+                    try {
+                        //Parse json
+                        JSONObject jsonObject = new JSONObject(returnResult);
+                        JSONArray jsonArray = jsonObject.getJSONArray("routes");
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject route = jsonArray.getJSONObject(i);
+                            JSONObject poly = route.getJSONObject("overview_polyline");
+                            String polyLine = poly.getString("points");
+                            polylineList = Common.decodePoly(polyLine);
 
-                }
-                polylineOptions = new PolylineOptions();
-                polylineOptions.color(Color.GRAY);
-                polylineOptions.width(5);
-                polylineOptions.startCap(new SquareCap());
-                polylineOptions.jointType(JointType.ROUND);
-                polylineOptions.addAll(polylineList);
-                greyPolyline = mMap.addPolyline(polylineOptions);
-
-                blackPolylineOptions = new PolylineOptions();
-                blackPolylineOptions.color(Color.BLACK);
-                blackPolylineOptions.width(5);
-                blackPolylineOptions.startCap(new SquareCap());
-                blackPolylineOptions.jointType(JointType.ROUND);
-                blackPolylineOptions.addAll(polylineList);
-                blackPolyline = mMap.addPolyline(blackPolylineOptions);
-
-                //Animator
-                ValueAnimator polylineAnimator = ValueAnimator.ofInt(0, 100);
-                polylineAnimator.setDuration(2000);
-                polylineAnimator.setInterpolator(new LinearInterpolator());
-                polylineAnimator.addUpdateListener(valueAnimator -> {
-                    List<LatLng> points = greyPolyline.getPoints();
-                    int percentValue = (int)valueAnimator.getAnimatedValue();
-                    int size = points.size();
-                    int newPoints = (int) (size*(percentValue/100.0f));
-                    List<LatLng> p = points.subList(0, newPoints);
-                    blackPolyline.setPoints(p);
-                });
-                polylineAnimator.start();
-
-                //Truck Moving
-                handler = new Handler();
-                index = -1;
-                next = 1;
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(index < polylineList.size()- 1)
-                        {
-                            index++;
-                            next = index+1;
-                            start = polylineList.get(index);
-                            end = polylineList.get(next);
                         }
+                        polylineOptions = new PolylineOptions();
+                        polylineOptions.color(Color.GRAY);
+                        polylineOptions.width(5);
+                        polylineOptions.startCap(new SquareCap());
+                        polylineOptions.jointType(JointType.ROUND);
+                        polylineOptions.addAll(polylineList);
+                        greyPolyline = mMap.addPolyline(polylineOptions);
+
+                        blackPolylineOptions = new PolylineOptions();
+                        blackPolylineOptions.color(Color.BLACK);
+                        blackPolylineOptions.width(5);
+                        blackPolylineOptions.startCap(new SquareCap());
+                        blackPolylineOptions.jointType(JointType.ROUND);
+                        blackPolylineOptions.addAll(polylineList);
+                        blackPolyline = mMap.addPolyline(blackPolylineOptions);
 
                         //Animator
-                        ValueAnimator valueAnimator = ValueAnimator.ofInt(0, 100);
-                        valueAnimator.setDuration(1500);
-                        valueAnimator.setInterpolator(new LinearInterpolator());
-                        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                            @Override
-                            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                                v = valueAnimator.getAnimatedFraction();
-                                lng = v*end.longitude+(1-v)
-                                        *start.longitude;
-                                lat = v*end.latitude+(1-v)
-                                        *start.latitude;
-                                LatLng newPos = new LatLng(lat, lng);
-                                marker.setPosition(newPos);
-                                marker.setAnchor(0.5f, 0.5f);
-                                marker.setRotation(Common.getBearing(start, newPos));
-
-                                mMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
-                            }
+                        ValueAnimator polylineAnimator = ValueAnimator.ofInt(0, 100);
+                        polylineAnimator.setDuration(2000);
+                        polylineAnimator.setInterpolator(new LinearInterpolator());
+                        polylineAnimator.addUpdateListener(valueAnimator -> {
+                            List<LatLng> points = greyPolyline.getPoints();
+                            int percentValue = (int) valueAnimator.getAnimatedValue();
+                            int size = points.size();
+                            int newPoints = (int) (size * (percentValue / 100.0f));
+                            List<LatLng> p = points.subList(0, newPoints);
+                            blackPolyline.setPoints(p);
                         });
+                        polylineAnimator.start();
 
-                        valueAnimator.start();
-                        if(index< polylineList.size() -2 )  // Reach destination
-                            handler.postDelayed(this, 1500);
+                        //Truck Moving
+                        handler = new Handler();
+                        index = -1;
+                        next = 1;
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (index < polylineList.size() - 1) {
+                                    index++;
+                                    next = index + 1;
+                                    start = polylineList.get(index);
+                                    end = polylineList.get(next);
+                                }
 
+                                //Animator
+                                ValueAnimator valueAnimator = ValueAnimator.ofInt(0, 100);
+                                valueAnimator.setDuration(1500);
+                                valueAnimator.setInterpolator(new LinearInterpolator());
+                                valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                                    @Override
+                                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                        v = valueAnimator.getAnimatedFraction();
+                                        lng = v * end.longitude + (1 - v)
+                                                * start.longitude;
+                                        lat = v * end.latitude + (1 - v)
+                                                * start.latitude;
+                                        LatLng newPos = new LatLng(lat, lng);
+                                        marker.setPosition(newPos);
+                                        marker.setAnchor(0.5f, 0.5f);
+                                        marker.setRotation(Common.getBearing(start, newPos));
+
+                                        mMap.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+                                    }
+                                });
+
+                                valueAnimator.start();
+                                if (index < polylineList.size() - 2)  // Reach destination
+                                    handler.postDelayed(this, 1500);
+
+                            }
+                        }, 1500);
+
+
+                    } catch (Exception e) {
+                        Toast.makeText(this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
-                } , 1500);
 
-
-            }
-            catch (Exception e){
-                Toast.makeText(this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-
-        }, throwable -> {
-            if(throwable!= null)
-                 Toast.makeText(ShippingActivity.this, ""+throwable.getMessage(), Toast.LENGTH_SHORT).show();
-        }));
+                }, throwable -> {
+                    if (throwable != null)
+                        Toast.makeText(ShippingActivity.this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                }));
 
     }
 
@@ -372,6 +457,7 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        setShippingOrder();
     }
 
     @Override

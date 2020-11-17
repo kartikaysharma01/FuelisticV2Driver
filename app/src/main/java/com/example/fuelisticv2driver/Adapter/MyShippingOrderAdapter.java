@@ -1,6 +1,7 @@
 package com.example.fuelisticv2driver.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.fuelisticv2driver.Common.Common;
 import com.example.fuelisticv2driver.Model.ShippingOrderModel;
 import com.example.fuelisticv2driver.R;
+import com.example.fuelisticv2driver.ShippingActivity;
 import com.google.android.material.button.MaterialButton;
+import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -21,6 +24,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import io.paperdb.Paper;
 
 public class MyShippingOrderAdapter extends RecyclerView.Adapter<MyShippingOrderAdapter.MyViewHolder> {
 
@@ -32,6 +36,7 @@ public class MyShippingOrderAdapter extends RecyclerView.Adapter<MyShippingOrder
         this.context = context;
         this.shippingOrderModelList = shippingOrderModelList;
         simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        Paper.init(context);
     }
 
     @NonNull
@@ -58,6 +63,14 @@ public class MyShippingOrderAdapter extends RecyclerView.Adapter<MyShippingOrder
         {
             holder.btn_deliver_now.setEnabled(false);
         }
+
+        // Event
+        holder.btn_deliver_now.setOnClickListener(view -> {
+
+            Paper.book().write(Common.SHIPPING_ORDER_DATA, new Gson().toJson(shippingOrderModelList.get(position)));
+            context.startActivity(new Intent(context, ShippingActivity.class));
+        });
+
     }
 
     @Override

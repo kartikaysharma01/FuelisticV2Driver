@@ -1,12 +1,24 @@
 package com.example.fuelisticv2driver.Model;
 
 public class ShippingOrderModel {
+    private String key;
+
+
     private String driverPhone, driverName, driverLicensePlate;
     private double currentLat, currentLng;
     private OrderModel orderModel;
     private boolean isStartTrip;
 
     public ShippingOrderModel() {
+    }
+
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getDriverPhone() {

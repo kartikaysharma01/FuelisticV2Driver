@@ -19,7 +19,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.fuelisticv2driver.Adapter.MyShippingOrderAdapter;
 import com.example.fuelisticv2driver.Common.Common;
+import com.example.fuelisticv2driver.Model.Eventbus.UpdateShippingOrderEvent;
 import com.example.fuelisticv2driver.R;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 
@@ -67,6 +72,25 @@ public class HomeFragment extends Fragment {
         recycler_order.setLayoutManager(layoutManager);
         recycler_order.addItemDecoration(new DividerItemDecoration(getContext(), layoutManager.getOrientation()));
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if(EventBus.getDefault().hasSubscriberForEvent(UpdateShippingOrderEvent.class))
+            EventBus.getDefault().removeStickyEvent(UpdateShippingOrderEvent.class);
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    public void onUpdateShippingOrder(UpdateShippingOrderEvent event){
+        homeViewModel.getShippingOrderMutableData(Common.currentDriverUser.getPhoneNo());           //update data
     }
 
 }

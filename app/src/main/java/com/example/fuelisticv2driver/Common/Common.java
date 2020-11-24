@@ -37,6 +37,8 @@ public class Common {
     public static final String TOKEN_REF = "Tokens";
     public static final String SHIPPING_ORDER_REF = "ShippingOrder";
     public static final String SHIPPING_ORDER_DATA = "ShippingData";
+    public static final String TRIP_START = "Trip";
+
 
     public static DriverUserModel currentDriverUser;
 
@@ -114,11 +116,13 @@ public class Common {
     }
 
     public static void updateToken(Context context, String newToken, boolean isSeller, boolean isDriver) {
-        FirebaseDatabase.getInstance()
-                .getReference(Common.TOKEN_REF)
-                .child(Common.currentDriverUser.getPhoneNo())
-                .setValue(new TokenModel(Common.currentDriverUser.getPhoneNo(), newToken, isSeller, isDriver))
-                .addOnFailureListener(e -> Toast.makeText(context, "" + e.getMessage(), Toast.LENGTH_SHORT).show());
+        if(Common.currentDriverUser != null) {
+            FirebaseDatabase.getInstance()
+                    .getReference(Common.TOKEN_REF)
+                    .child(Common.currentDriverUser.getPhoneNo())
+                    .setValue(new TokenModel(Common.currentDriverUser.getPhoneNo(), newToken, isSeller, isDriver))
+                    .addOnFailureListener(e -> Toast.makeText(context, "" + e.getMessage(), Toast.LENGTH_SHORT).show());
+        }
 
     }
 
@@ -170,5 +174,27 @@ public class Common {
             poly.add(p);
         }
         return poly;
+    }
+
+    public static String getDayOfWeek(int i) {
+        i = i - 1;
+        switch (i) {
+            case 1:
+                return "Monday";
+            case 2:
+                return "Tuesday";
+            case 3:
+                return "Wednesday";
+            case 4:
+                return "Thursday";
+            case 5:
+                return "Friday";
+            case 6:
+                return "Saturday";
+            case 7:
+                return "Sunday";
+            default:
+                return "Unknown";
+        }
     }
 }

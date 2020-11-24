@@ -7,6 +7,8 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -22,13 +24,19 @@ import android.view.animation.LinearInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.fuelisticv2driver.Adapter.MyShippingOrderAdapter;
 import com.example.fuelisticv2driver.Common.Common;
 import com.example.fuelisticv2driver.Common.LatLngInterpolator;
 import com.example.fuelisticv2driver.Common.MarkerAnimation;
 import com.example.fuelisticv2driver.Model.DriverUserModel;
+import com.example.fuelisticv2driver.Model.Eventbus.UpdateShippingOrderEvent;
+import com.example.fuelisticv2driver.Model.FCMSendData;
 import com.example.fuelisticv2driver.Model.ShippingOrderModel;
+import com.example.fuelisticv2driver.Model.TokenModel;
+import com.example.fuelisticv2driver.Remote.IFCMService;
 import com.example.fuelisticv2driver.Remote.IGoogleAPI;
 import com.example.fuelisticv2driver.Remote.RetrofitClient;
+import com.example.fuelisticv2driver.Remote.RetrofitFCMClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -51,6 +59,10 @@ import com.google.android.gms.maps.model.SquareCap;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -61,11 +73,14 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -98,6 +113,7 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
     private PolylineOptions polylineOptions, blackPolylineOptions;
     private List<LatLng> polylineList;
     private IGoogleAPI iGoogleAPI;
+    private IFCMService ifcmService;
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private boolean isInit = false;
@@ -118,15 +134,169 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
     MaterialButton btn_call;
     @BindView(R.id.btn_done)
     MaterialButton btn_done;
-    private Polyline redPolyline;
 
-    @OnClick(R.id.btn_start_trip)
-    void onStartTripClicked(){
+    private Polyline redPolyline;
+//    MyShippingOrderAdapter adapter;
+
+    @OnClick(R.id.btn_done)
+    void onDoneClick() {
+        if (shippingOrderModel != null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                    .setTitle("Order Completed")
+                    .setMessage("Is this order delivered?")
+                    .setNegativeButton("No", (dialogInterface, i) -> dialogInterface.dismiss())
+                    .setPositiveButton("Yes", (dialogInterface, i) -> {
+
+                        AlertDialog dialog = new AlertDialog.Builder(this)
+                                .setCancelable(false)
+                                .setMessage("Waiting...")
+                                .create();
+
+                        //Update Order
+                        Map<String, Object> update_data = new HashMap<>();
+                        update_data.put("orderStatus", 2);
+//                            update_data.put("phoneNo", Common.currentDriverUser.getPhoneNo());  // ,MAYBE driverPhone
+
+                        FirebaseDatabase.getInstance()
+                                .getReference(Common.ORDER_REF)
+                                .child(shippingOrderModel.getOrderModel().getKey())
+                                .updateChildren(update_data)
+                                .addOnFailureListener(e -> Toast.makeText(ShippingActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show())
+                                .addOnSuccessListener(aVoid -> {
+
+                                    // Delete shipping order information
+                                    FirebaseDatabase.getInstance()
+                                            .getReference(Common.SHIPPING_ORDER_REF)
+                                            .child(shippingOrderModel.getOrderModel().getKey())
+                                            .removeValue()
+                                            .addOnFailureListener(e -> Toast.makeText(ShippingActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show())
+                                            .addOnSuccessListener(aVoid1 -> {
+                                                // Delete done
+                                                FirebaseDatabase.getInstance()
+                                                        .getReference(Common.TOKEN_REF)
+                                                        .child(shippingOrderModel.getOrderModel().getUserPhone())
+                                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                            @Override
+                                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                                if (snapshot.exists()) {
+                                                                    TokenModel tokenModel = snapshot.getValue(TokenModel.class);
+                                                                    Map<String, String> notiData = new HashMap<>();
+                                                                    notiData.put(Common.NOTI_TITLE, "Your Order has been shipped!!");
+                                                                    notiData.put(Common.NOTI_CONTENT, new StringBuilder("Your Order ")
+                                                                            .append(shippingOrderModel.getOrderModel().getKey())
+                                                                            .append(" just got delivered by ")
+                                                                            .append(Common.currentDriverUser.getFullName()).toString());
+
+                                                                    FCMSendData sendData = new FCMSendData(tokenModel.getToken(), notiData);
+
+
+                                                                    compositeDisposable.add(ifcmService.sendNotification(sendData)
+                                                                            .subscribeOn(Schedulers.io())
+                                                                            .observeOn(AndroidSchedulers.mainThread())
+                                                                            .subscribe(fcmResponse -> {
+                                                                                dialog.dismiss();
+                                                                                if (fcmResponse.getSuccess() == 1) {
+                                                                                    Toast.makeText(ShippingActivity.this,
+                                                                                            "Order Completed Successfully!", Toast.LENGTH_SHORT).show();
+                                                                                } else {
+                                                                                    Toast.makeText(ShippingActivity.this, "Order Completed Successfully but " +
+                                                                                            "failed to send notification!", Toast.LENGTH_SHORT).show();
+                                                                                }
+
+                                                                                if(!TextUtils.isEmpty(Paper.book().read(Common.TRIP_START)));
+                                                                                    Paper.book().delete(Common.TRIP_START);
+
+                                                                                EventBus.getDefault().postSticky(new UpdateShippingOrderEvent());
+                                                                                finish();
+
+                                                                            }, throwable -> {
+                                                                                dialog.dismiss();
+                                                                                Toast.makeText(ShippingActivity.this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                                                            }));
+                                                                } else {
+                                                                    dialog.dismiss();
+                                                                    Toast.makeText(ShippingActivity.this, "Token not found!", Toast.LENGTH_SHORT).show();
+                                                                }
+                                                            }
+
+                                                            @Override
+                                                            public void onCancelled(@NonNull DatabaseError error) {
+                                                                dialog.dismiss();
+                                                                Toast.makeText(ShippingActivity.this, "" + error.getMessage(), Toast.LENGTH_SHORT).show();
+                                                            }
+                                                        });
+
+
+                                            });
+                                });
+
+                    });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+        }
+    }
+
+    @OnClick(R.id.btn_call)
+    void onCallClick() {
+        Paper.init(this);
         String data = Paper.book().read(Common.SHIPPING_ORDER_DATA);
-//        Paper.book().write(Common.TRIP_START, data);
+
+        shippingOrderModel = new Gson()
+                .fromJson(data, new TypeToken<ShippingOrderModel>() {
+                }.getType());
+
+        Dexter.withActivity(this)
+                .withPermission(Manifest.permission.CALL_PHONE)
+                .withListener(new PermissionListener() {
+                    @Override
+                    public void onPermissionGranted(PermissionGrantedResponse response) {
+                        Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_DIAL);
+                        intent.setData(Uri.parse(new StringBuilder("tel: ")
+                                .append(shippingOrderModel.getOrderModel().getUserPhone()).toString()));
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onPermissionDenied(PermissionDeniedResponse response) {
+                        Toast.makeText(ShippingActivity.this, "You must accept" + response.getPermissionName(), Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+
+                    }
+                }).check();
+    }
+
+    @SuppressLint("MissingPermission")
+    @OnClick(R.id.btn_start_trip)
+    void onStartTripClicked() {
+        String data = Paper.book().read(Common.SHIPPING_ORDER_DATA);
+        Paper.book().write(Common.TRIP_START, data);
 //        btn_start_trip.setEnabled(false);
 
-        drawRoutes(data);
+        fusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+
+                    Map<String, Object> update_data = new HashMap<>();
+                    update_data.put("currentLat", location.getLatitude());
+                    update_data.put("currentLng", location.getLongitude());
+
+                    FirebaseDatabase.getInstance()
+                            .getReference(Common.SHIPPING_ORDER_REF)
+                            .child(shippingOrderModel.getKey())
+                            .updateChildren(update_data)
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnSuccessListener(aVoid -> {
+                                drawRoutes(data);
+                            });
+                })
+                .addOnFailureListener(e -> Toast.makeText(ShippingActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show());
+
     }
 
     @Override
@@ -135,6 +305,7 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
         setContentView(R.layout.activity_shipping);
 
         iGoogleAPI = RetrofitClient.getInstance().create(IGoogleAPI.class);
+        ifcmService = RetrofitFCMClient.getInstance().create(IFCMService.class);
 
         ButterKnife.bind(this);
         buildLocationRequest();
@@ -215,7 +386,6 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
                 .position(new LatLng(shippingOrderModel.getOrderModel().getLat(), shippingOrderModel.getOrderModel().getLng())));
 
 
-
         fusedLocationProviderClient.getLastLocation()
                 .addOnFailureListener(e -> Toast.makeText(ShippingActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show())
                 .addOnSuccessListener(location -> {
@@ -259,7 +429,7 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
                                     polylineOptions.addAll(polylineList);
                                     redPolyline = mMap.addPolyline(polylineOptions);
                                 } catch (Exception e) {
-                                    Toast.makeText(this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
 
                             }, throwable -> Toast.makeText(ShippingActivity.this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show()));
@@ -271,8 +441,6 @@ public class ShippingActivity extends FragmentActivity implements OnMapReadyCall
 
 
                 });
-
-
 
 
     }

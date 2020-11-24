@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:paddingLeft="24dp"
+    android:paddingTop="15dp"
+    android:paddingRight="24dp"
+    android:paddingBottom="15dp">
+
+    <TextView
+        android:id="@+id/txt_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:fontFamily="@font/brandon_medium"
+        android:text="Order Details"
+        android:textColor="@color/black"
+        android:textSize="32sp"
+        android:textStyle="bold" />
+
+    <ScrollView
+        android:layout_below="@+id/txt_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/layout_button"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:layout_marginTop="20dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Order Number"
+                app:hintTextColor="@color/black"
+                android:textColorHint="@color/black"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxStrokeColor="@color/black">
+
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/order_details_order_num"
+                    android:layout_width="match_parent"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:fontFamily="@font/brandon_medium">
+
+
+                </com.google.android.material.textfield.TextInputEditText>
+
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+                android:hint="Customer Username"
+                android:textColorHint="@color/black"
+                app:hintTextColor="@color/black"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxStrokeColor="@color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/order_details_cust_name"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:inputType="text"
+                    android:fontFamily="@font/brandon_medium">
+
+                </com.google.android.material.textfield.TextInputEditText>
+
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+
+                android:layout_height="wrap_content"
+                android:hint="Customer Phone No. "
+                android:textColorHint="@color/black"
+                app:hintTextColor="@color/black"
+                app:boxStrokeWidthFocused="2dp"
+                android:focusable="false"
+                app:boxStrokeColor="@color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:id="@+id/order_details_cust_phone"
+                    android:inputType="number"
+                    android:fontFamily="@font/brandon_medium">
+
+                </com.google.android.material.textfield.TextInputEditText>
+
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Payment Method"
+                android:textColorHint="@color/black"
+                app:hintTextColor="@color/black"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxStrokeColor="@color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/order_details_transaction_id"
+                    android:inputType="textEmailAddress"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:fontFamily="@font/brandon_medium">
+                </com.google.android.material.textfield.TextInputEditText>
+
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Delivery Address"
+                android:textColorHint="@color/black"
+                app:hintTextColor="@color/black"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxStrokeColor="@color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/order_details_delivery_address"
+                    android:fontFamily="@font/brandon_medium"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:inputType="text">
+                </com.google.android.material.textfield.TextInputEditText>
+
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Delivery Charge"
+                android:textColorHint="@color/black"
+                app:hintTextColor="@color/black"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxStrokeColor="@color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/brandon_medium"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:id="@+id/order_details_delivery_charge"
+                    android:inputType="text">
+                </com.google.android.material.textfield.TextInputEditText>
+
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Total Order amount"
+                android:textColorHint="@color/black"
+                app:hintTextColor="@color/black"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxStrokeColor="@color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:fontFamily="@font/brandon_medium"
+                    android:id="@+id/order_details_total_order_amt"
+                    android:inputType="text">
+                </com.google.android.material.textfield.TextInputEditText>
+
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Order Placed on"
+                android:textColorHint="@color/black"
+                app:hintTextColor="@color/black"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxStrokeColor="@color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/brandon_medium"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:id="@+id/order_details_order_date"
+                    android:inputType="text">
+                </com.google.android.material.textfield.TextInputEditText>
+
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Order Quantity"
+                android:textColorHint="@color/black"
+                app:hintTextColor="@color/black"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxStrokeColor="@color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/brandon_medium"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:id="@+id/order_details_order_quantity"
+                    android:inputType="text">
+                </com.google.android.material.textfield.TextInputEditText>
+
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Delivery Date"
+                android:textColorHint="@color/black"
+                app:hintTextColor="@color/black"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxStrokeColor="@color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:fontFamily="@font/brandon_medium"
+                    android:id="@+id/order_details_delivery_date"
+                    android:inputType="text">
+                </com.google.android.material.textfield.TextInputEditText>
+
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Delivery Mode"
+                android:textColorHint="@color/black"
+                app:hintTextColor="@color/black"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxStrokeColor="@color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:fontFamily="@font/brandon_medium"
+                    android:id="@+id/order_details_delivery_mode"
+                    android:inputType="text">
+                </com.google.android.material.textfield.TextInputEditText>
+
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Delivery Comment"
+                android:textColorHint="@color/black"
+                app:hintTextColor="@color/black"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxStrokeColor="@color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:editable="false"
+                    android:focusable="false"
+                    android:fontFamily="@font/brandon_medium"
+                    android:id="@+id/order_details_delivery_cmt"
+                    android:inputType="text">
+                </com.google.android.material.textfield.TextInputEditText>
+
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+
+        </LinearLayout>
+
+
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/layout_button"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="right"
+        android:orientation="horizontal">
+
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:id="@+id/btn_ok"
+            android:text="Ok"
+            android:textColor="@android:color/holo_red_dark"
+            android:background="@android:color/transparent"
+            />
+
+    </LinearLayout>
+
+</RelativeLayout>

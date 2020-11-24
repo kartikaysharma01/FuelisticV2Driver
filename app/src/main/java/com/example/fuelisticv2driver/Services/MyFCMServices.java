@@ -26,7 +26,6 @@ public class MyFCMServices extends FirebaseMessagingService {
             EventBus.getDefault().postSticky(new UpdateShippingOrderEvent());           // update order list on recieving new order
         }
 
-
     }
 
     @Override

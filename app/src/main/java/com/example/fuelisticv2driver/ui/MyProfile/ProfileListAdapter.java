@@ -1,4 +1,4 @@
-package com.example.fuelisticv2driver.ui;
+package com.example.fuelisticv2driver.ui.MyProfile;
 
 import android.content.Context;
 import android.view.LayoutInflater;

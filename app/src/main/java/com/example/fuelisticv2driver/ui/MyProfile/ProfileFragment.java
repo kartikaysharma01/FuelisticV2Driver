@@ -1,6 +1,4 @@
-package com.example.fuelisticv2driver.ui;
-
-import androidx.lifecycle.ViewModelProvider;
+package com.example.fuelisticv2driver.ui.MyProfile;
 
 import android.content.Context;
 import android.os.Bundle;

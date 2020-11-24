@@ -54,7 +54,7 @@
         <activity android:name=".LoginSignUp.AppStartUpScreen" />
         <activity android:name=".MainActivity" />
 
-        <activity android:name=".LoginSignUp.LogoSplash">
+        <activity android:name=".LoginSignUp.LogoSplash" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

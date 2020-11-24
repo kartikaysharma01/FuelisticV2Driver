@@ -6,6 +6,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
@@ -19,8 +20,7 @@ import com.example.fuelisticv2driver.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProfileFragment extends Fragment
-{
+public class ProfileFragment extends Fragment {
     public TextView userName;
     //private ProfileViewModel mViewModel;
 
@@ -29,15 +29,13 @@ public class ProfileFragment extends Fragment
     private ProfileListAdapter mAdapter;
     private Context ctx;
 
-    public static ProfileFragment newInstance()
-    {
+    public static ProfileFragment newInstance() {
         return new ProfileFragment();
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState)
-    {
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.profile_fragment, container, false);
 
         userName = view.findViewById(R.id.profile_userName);
@@ -50,7 +48,7 @@ public class ProfileFragment extends Fragment
         mList.add(itemAdapter);
 
         itemAdapter = new ItemAdapter();
-        itemAdapter.setInputDesc("Email");
+        itemAdapter.setInputDesc("Aadhaar Number");
         itemAdapter.setInputValue(Common.currentDriverUser.getAadhaar());
         itemAdapter.setImg(R.drawable.ic_baseline_contact_page_24);
         mList.add(itemAdapter);
@@ -62,7 +60,7 @@ public class ProfileFragment extends Fragment
         mList.add(itemAdapter);
 
         itemAdapter = new ItemAdapter();
-        itemAdapter.setInputDesc("Address");
+        itemAdapter.setInputDesc("License Plate Number");
         itemAdapter.setInputValue(Common.currentDriverUser.getLicensePlate());
         itemAdapter.setImg(R.drawable.ic_baseline_confirmation_number_24);
         mList.add(itemAdapter);
@@ -79,6 +77,8 @@ public class ProfileFragment extends Fragment
         itemAdapter.setImg(R.drawable.ic_baseline_how_to_reg_24);
         mList.add(itemAdapter);
 
+        */
+
         ctx = view.getContext();
         mRecycleview = view.findViewById(R.id.profileRecycler);
         mAdapter = new ProfileListAdapter(mList, ctx);
@@ -86,14 +86,11 @@ public class ProfileFragment extends Fragment
         mRecycleview.setLayoutManager(new LinearLayoutManager(ctx));
         //mAdapter.notifyDataSetChanged();
 
-         */
-
         return view;
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState)
-    {
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         //mViewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
         // TODO: Use the ViewModel

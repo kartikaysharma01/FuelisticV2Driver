@@ -4,18 +4,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground"
+    android:background="@color/white"
     tools:context=".LoginSignUp.LogoSplash">
 
     <ImageView
         android:id="@+id/splash_screen_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="10dp"
+        android:paddingLeft="41dp"
+        android:paddingRight="41dp"
+        android:paddingBottom="120dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.55"
         app:srcCompat="@drawable/logo" />
+
+<!--    <TextView-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:fontFamily="@font/bungee"-->
+<!--        android:text="Fuelistic"-->
+<!--        android:textAllCaps="false"-->
+<!--        android:textColor="#2B2929"-->
+<!--        android:textFontWeight="10000"-->
+<!--        android:textSize="40sp"-->
+<!--        android:textStyle="bold|normal"-->
+<!--        app:layout_constraintBottom_toBottomOf="@id/splash_screen_logo"-->
+<!--        app:layout_constraintEnd_toEndOf="@id/splash_screen_logo"-->
+<!--        app:layout_constraintStart_toStartOf="@id/splash_screen_logo"-->
+<!--        app:layout_constraintTop_toTopOf="@+id/splash_screen_logo"-->
+<!--        app:layout_constraintVertical_bias="0.642"-->
+<!--        tools:ignore="MissingConstraints" />-->
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

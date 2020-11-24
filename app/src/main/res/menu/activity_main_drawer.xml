@@ -9,15 +9,24 @@
             android:icon="@drawable/ic_baseline_local_shipping_24"
             android:title="@string/menu_home" />
 
+    </group>
+
+    <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_myProfile"
             android:icon="@drawable/ic_baseline_assignment_ind_24"
             android:title="My Profile" />
 
+    </group>
+
+
+
+    <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_logout"
             android:icon="@drawable/ic_baseline_exit_to_app_24"
             android:title="Logout" />
-
     </group>
+
+
 </menu>

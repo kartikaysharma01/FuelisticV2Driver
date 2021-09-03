@@ -42,8 +42,6 @@ Have a bug or a feature request? Please search for existing and closed issues. I
 ## Contributors
 
 The project was initially started and developed by [Kartikay Sharma](https://github.com/kartikaysharma01), other contributors include:
-- [Mansi](https://www.linkedin.com/in/mansivikram/)
 - [Puru Agarwal](https://github.com/Puru80)
-- [Ritika Saini](https://github.com/ritika309)
 - [Full list of contributions (commits) made by contributors](https://github.com/kartikaysharma01/FuelisticV2Client/graphs/contributors)
 
